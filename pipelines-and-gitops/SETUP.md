@@ -14,6 +14,7 @@ Fork the following project on github - <a href="https://github.com/starnold-redh
 The setup can be viewed in a number of stages
 
 * Install the required operators - pipelines, gitops and sealed-secrets
+* Configure the selaed secrets operator
 * Bootstrap the gitops process using kam to generate the gitops files
 * Modify the pipeline to link the builds to deployments
 * Create and configure a second environment
@@ -28,29 +29,68 @@ The setup can be viewed in a number of stages
       ![OperatorHub](images/operatorhub-menu.png)
     
     * Search for GitOps and you should see the following
+     
+      ![GitopsTile](images/gitops-tile.png)
+
     * Click on the tile to see the details
+    
+      ![GitopsOperatorInfo](images/gitops-operator-info.png)
+    
     * Click Install to get to the Install Operator page
+
+      ![GitOpsInstall](images/gitops-operator-install.png)
+
     * Accept the defaults and click Install
-    * Wait until you see Installed Operator - ready for use
+    * Wait until you see Installed Operator - ready for use.
     * Now install the pipelines operator.  Go back to OperatorHub.
     * Search for pipelines - you should see this.
+
+      ![PipelinesTile](images/pipelines-tile.png)
+
     * Click on the tile to get to the operator information page.
+
+      ![PipelinesInfo](images/pipelines-operator-info.png)
+
     * Click Install to get to the operator installation page.
+
+      ![PipelinesInstall](images/pipelines-operator-install.png)
+
     * Accept the defaults, and click Install.
     * Wait for the Operator to install.
     * Finally we need to install the sealed secrets operator.  So go back to OperatorHub, and search for secrets.
+
+      ![SecretsTile](images/sealed-secrets-tile.png)
+
     * Click on the tile to open up the operator information page (hit continue if prompted with a warning about community operators).
+
+      ![SeecretsOperatorInfo](images/sealed-secrets-operator-info.png)
+
     * Click on Install to get to the installation page.
+
+      ![SecretsOperatorInstall](images/sealed-secrets-operator-install.png)
+
     * Accept the defaults and click on Install.  Wait until the operator is installed.
     * Great - all the operators are now installed.
   
 2. Create an instance of the sealed-secrets operator
     * Click on the Installed Operators menu item.   You should see a list of operators like this.
+
+      ![InstalledOperators](images/installed-operators.png)
+
     * Click on the sealed secrets operator.  You should see this
-    * Click on Create instance on the SealedSecretController tile.
+
+      ![SealedSecretsOperatorPostInstall](images/sealed-secrets-operator-post-install.png)
+
+    * Click on Create instance on the SealedSecretController tilee
     * Change the name to sealed-secrets-controller
+
+      ![CreateSealedSecretsController](images/sealed-secrets-controller-creation.png)
+
     * Click Create.
     * Wait until the Status is Deployed as below.
+
+      ![InstalledSecretsController](images/sealed-secrets-controller-post-install.png)
+
     * The sealed secrets controller is now installed.
 
 3. Use kam to bootstrap the gitops files.  To do that we're going to need to generate a git access token, and generate the docker cfg.
@@ -78,7 +118,7 @@ The setup can be viewed in a number of stages
     
 4. Setup the pipeline
  
-  The thing that is missing from the pipeline, is the automatic link between building a new image on a code change, and letting ArgoCD know about it.  So to fix this we need to add a new task, which updates the gitops repository with the new image tag whenever a pipeline runs.
+  The thing that is missing from the pipeline, is the automatic link between building a new image on a code change, and letting Openshift GitOps know about it.  So to fix this we need to add a new task, which updates the gitops repository with the new image tag whenever a pipeline runs.
   
     * First thing is to create the new task which needs an image with both the git command line and kustomize installed.
     * First copy the kustomize image into the cluster with 
@@ -87,7 +127,7 @@ The setup can be viewed in a number of stages
 
     * Now create a new task in the gitops/config/cicd/base/04-tasks folder.  Name the new task update-image-tag.yaml, and populate it with these contents.
     
-      ```
+   
       apiVersion: tekton.dev/v1beta1
       kind: Task
       metadata:
@@ -155,13 +195,13 @@ The setup can be viewed in a number of stages
             git push -u origin HEAD:main
        workspaces:
                     - name: source
-       ```
+       
 
     * Modify the task to use your git user name, and your git repo.
     * Go to the 05-pipelines folder, and open up the app-ci-pipeline.yaml
     * After the build image task, add the following task definition to the pipeline (changing the gitops repo value).
     
-    ```
+    
       - name: update-ops-repo
             params:
             - name: OPS_GIT_REPO
@@ -180,10 +220,4 @@ The setup can be viewed in a number of stages
             workspaces:
             - name: source
               workspace: shared-data
-      ```
-
-
-
-
-
 
