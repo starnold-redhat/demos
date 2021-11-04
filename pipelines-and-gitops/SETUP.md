@@ -115,10 +115,10 @@ The setup can be viewed in a number of stages
     * Next we need to generate the docker cfg json to access internal openshift repo. Login to the cluster with `oc login`
     * Login to the registry with `oc registry login`
     * Check you have a new file at ~/.docker/config.json
-    * Use kam to bootstrap the gitops files.  Issue the following kam command from the command line, replacing the access token, gitops url (with the url to a new github project), service-repo-url (with the one cloned at the beginning), gitops-webhook-secret and service-webhook-secret (with any text you like).
+    * Use kam to bootstrap the gitops files.  Copy and then modify the following kam command from the command line, replacing the access token, gitops url (with the url to a new github project), service-repo-url (with the one cloned at the beginning), gitops-webhook-secret and service-webhook-secret (with any text you like).
 
     ```
-    Kam bootstrap --git-host-access-token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    kam bootstrap --git-host-access-token xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                   --gitops-repo-url https://github.com/starnold-redhat/python-demo-gitops.git 
                   --gitops-webhook-secret kam-gitops-secret123! 
                   --push-to-git 
@@ -164,7 +164,7 @@ The setup can be viewed in a number of stages
       - name: IMAGE
         type: string
       - name: BUILDER_IMAGE
-        default: quay.io/starnold/pipeline-kustomize:2
+        default: cicd/kustomize:1
         description: The location of the buildah builder image.
         type: string
 
