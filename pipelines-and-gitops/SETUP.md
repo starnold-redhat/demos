@@ -128,6 +128,8 @@ The setup can be viewed in a number of stages
                   --service-webhook-secret kam-gitops-secret123!
     ```
     
+    * Now modify the deployment files for the app to pick up the generated image from the pipeline [TODO]
+    
 4. **Setup the pipeline.** - The thing that is missing from the pipeline, is the automatic link between building a new image on a code change, and letting Openshift GitOps know about it.  So to fix this we need to add a new task, which updates the gitops repository with the new image tag whenever a pipeline runs. 
     
     * Before we create tne new task, we need an image with both the git command line and kustomize installed.  I've built one already - and you can just copy it into your cluster as follows.
@@ -260,4 +262,35 @@ The setup can be viewed in a number of stages
 
     * Great - you've now finished the pipelines.
 
+
+5. **Setup the argo cd.** 
+
+Probably make the gitops project public - as its a bit easier.  Otherwise you will need to create access from argocd.
+
+Get the admin passworf for argo
+
+Navigate to the argocd ui
+
+login
+
+create a high level application with the following values
+
+| field        | value                                                          |
+| ------------ | ---------------------------------------------------------------|
+| name         | PYTHON-OVERALL-GITOPS                                          |
+| project      | default                                                        |
+| sync policy  | automated                                                      |
+| git repo url | https://github.com/starnold-redhat/python-demo-gitops-nov4.git |
+| git path     | config/argocd                                                  |
+| cluster      | https://kubernetes.default.svc                                 |
+| namespace    | openshift-gitops                                               |
+
+
+6. **Finally setup the git webhook**
+
+Finally need to go into the source code project, and create a webhook to call the pipeline.
+
+Go into openshift, and go into the cicd namespace.
+
+You
 
