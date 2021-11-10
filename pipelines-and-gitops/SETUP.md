@@ -134,7 +134,10 @@ The setup can be viewed in a number of stages
     
     * Before we create tne new task, we need an image with both the git command line and kustomize installed.  I've built one already - and you can just copy it into your cluster as follows.
 
-    `oc import-image cicd/kustomize:1 --from=quay.io/starnold/pipeline-kustomize:2 --confirm`
+    ```
+    oc new-project cicd
+    oc import-image cicd/kustomize:1 --from=quay.io/starnold/pipeline-kustomize:2 --confirm
+    ```
 
     * Now create a new task in the gitops/config/cicd/base/04-tasks folder.  Name the new task update-image-tag.yaml, and populate it with these contents.  
 
@@ -166,7 +169,7 @@ The setup can be viewed in a number of stages
       - name: IMAGE
         type: string
       - name: BUILDER_IMAGE
-        default: cicd/kustomize:1
+        default: image-registry.openshift-image-registry.svc:5000/cicd/kustomize
         description: The location of the buildah builder image.
         type: string
 
