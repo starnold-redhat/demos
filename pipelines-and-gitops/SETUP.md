@@ -252,6 +252,18 @@ The setup can be viewed in a number of stages
         workspace: shared-data
     ```
 
+    Now you need to include the new task so it gets created by argo.  To do this, navigate to config/cicd/base.  Edit the kustomzation.yaml file, and add in the new task by including `- 04-tasks/update-image-tag.yaml` in the resources section.  It should look a bit like this.
+    
+    ```
+    - 03-secrets/gitops-webhook-secret.yaml
+    - 03-secrets/webhook-secret-dev-python-devfile.yaml
+    - 04-tasks/update-image-tag.yaml
+    - 04-tasks/deploy-from-source-task.yaml
+    - 04-tasks/set-commit-status-task.yaml
+    ```
+    
+    
+
     * Push these changes back to github with
 
     ```
@@ -259,6 +271,8 @@ The setup can be viewed in a number of stages
     git commit -m "updated pipelines"
     git push -u origin main
     ```
+    
+    
 
     * Great - you've now finished the pipelines.
 
