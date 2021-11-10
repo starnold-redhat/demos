@@ -290,7 +290,22 @@ create a high level application with the following values
 
 Finally need to go into the source code project, and create a webhook to call the pipeline.
 
-Go into openshift, and go into the cicd namespace.
+Go into openshift, and go to projects, and click on cicd.
 
-You
+From the cicd overview page, go to the inventory panel, and click on routes.
+
+Copy the route url, and go to github, and go to the source project.
+
+Click on Settings->Webhooks.  Then click on Add webhook.
+
+Paste the url from the event listener into the Payload URL field.  Set the content type to be application/json, and the secret to be the value from when you issued the kam command (kam-gitops-secret123! if you didnt change it).
+
+Then click on Add webhook.
+
+Switch back to the code tab, edit the README.md and make a simple change by clicking on the pencil icon.
+
+Then press the commit changes button.  This should now trigger a pipeline build.
+
+Switch back to openshift, 
+
 
