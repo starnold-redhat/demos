@@ -169,7 +169,7 @@ The setup can be viewed in a number of stages
       - name: IMAGE
         type: string
       - name: BUILDER_IMAGE
-        default: image-registry.openshift-image-registry.svc:5000/cicd/kustomize
+        default: image-registry.openshift-image-registry.svc:5000/cicd/kustomize:1
         description: The location of the buildah builder image.
         type: string
 
