@@ -196,23 +196,23 @@ The setup can be viewed in a number of stages
 
           cd localgitops
 
-          git clone "https://${GITHOSTACCESSTOKEN}@github.com/${OPS_GIT_REPO}"
+          git clone https://${GITHOSTACCESSTOKEN}@github.com/$(params.OPS_GIT_REPO)
 
           # set image for dev deployment
 
-          cd /workspace/source/localgitops/${OPS_GIT_NAME}/environments/dev/apps/${SRC_GIT_NAME}/services/python-devfile/base/config
+          cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)/environments/dev/apps/$(params.SRC_GIT_NAME)/services/python-devfile/base/config
 
           kustomize edit set image $(params.IMAGE)
 
           # set image for stage deployment
 
-          cd /workspace/source/localgitops/${OPS_GIT_NAME}/environments/stage/apps/${SRC_GIT_NAME}/services/python-devfile/base/config
+          cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)/environments/stage/apps/$(params.SRC_GIT_NAME)/services/python-devfile/base/config
 
           kustomize edit set image $(params.IMAGE)
 
           # Push back to git
 
-          cd /workspace/source/localgitops/python-gitops
+          cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)
 
           git add .
 
@@ -284,19 +284,20 @@ The setup can be viewed in a number of stages
 
 Probably make the gitops project public - as its a bit easier.  Otherwise you will need to create access from argocd.
 
-Get the admin passworf for argo
+Get the admin password for argo.  From the command line type `oc -n openshift-gitops get secret openshift-gitops-cluster -o jsonpath="{.data['admin\.password']}" | base64 -d ; echo`
 
-Navigate to the argocd ui
 
-login
+Navigate to the argocd ui, by opening up openshift, clicking on the application menu (nine squares in the top right), and choosing Cluster ArgoCD. 
+
+login as admin and the password above.
 
 create a high level application with the following values
 
 | field        | value                                                          |
 | ------------ | ---------------------------------------------------------------|
-| name         | PYTHON-OVERALL-GITOPS                                          |
+| name         | python-overall-gitops                                          |
 | project      | default                                                        |
-| sync policy  | automated                                                      |
+| sync policy  | Automatic                                                      |
 | git repo url | https://github.com/starnold-redhat/python-demo-gitops-nov4.git |
 | git path     | config/argocd                                                  |
 | cluster      | https://kubernetes.default.svc                                 |
