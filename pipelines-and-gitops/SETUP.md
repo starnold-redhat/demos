@@ -265,17 +265,24 @@ The setup can be viewed in a number of stages
     - 04-tasks/set-commit-status-task.yaml
     ```
     
-    
+    * Now modify the deployment files for the app to pick up the generated image from the pipeline.  Navigate to environments/dev/apps/app-python-devfile/services/python-devfile/base/config.
 
+    * Edit the 100-deployment.yaml file, and replace the image with `image-registry.openshift-image-registry.svc:5000/cicd/python-devfile`
+
+    * Navigate back to the environments directory, and copy the app configuration from dev into staging.  This will define how to deploy the app into staging.  We could get clever here, and point the staging kustomization files back to dev, so that we only have one copy of the yamls.  But for ease in the tutorial we will copy them.
+
+    `
+    cp -R dev/apps stage
+    `
+    
     * Push these changes back to github with
 
     ```
+    cd ..
     git add .
     git commit -m "updated pipelines"
     git push -u origin main
     ```
-    
-    
 
     * Great - you've now finished the pipelines.
 
