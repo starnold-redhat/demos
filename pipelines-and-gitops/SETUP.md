@@ -224,9 +224,19 @@ The setup can be viewed in a number of stages
 
     ```
 
-    * Modify the task to use your git user name and git email as the default values ( or modify the pipeline in the next step to pass these values in)
+    * Modify the task to use your git user name and git email as the default values, also modify the OPS_GIT_NAME and SRC_GIT_NAME to be the name of the appropriate git repos.
+    * Now you need to include the new task so it gets created by argo.  To do this, navigate to config/cicd/base.  Edit the kustomzation.yaml file, and add in the new task by including `- 04-tasks/update-image-tag.yaml` in the resources section.  It should look a bit like this.
+    
+    ```
+    - 03-secrets/gitops-webhook-secret.yaml
+    - 03-secrets/webhook-secret-dev-python-devfile.yaml
+    - 04-tasks/update-image-tag.yaml
+    - 04-tasks/deploy-from-source-task.yaml
+    - 04-tasks/set-commit-status-task.yaml
+    ```
+
     * Go to the 05-pipelines folder, and open up the app-ci-pipeline.yaml
-    * After the build image task, add the following task definition to the pipeline (changing the gitops repo value).
+    * After the build image task, add the following task definition to the pipeline (changing the gitops repo value, username and email).
 
     ```
     - name: update-ops-repo
@@ -255,15 +265,7 @@ The setup can be viewed in a number of stages
         workspace: shared-data
     ```
 
-    Now you need to include the new task so it gets created by argo.  To do this, navigate to config/cicd/base.  Edit the kustomzation.yaml file, and add in the new task by including `- 04-tasks/update-image-tag.yaml` in the resources section.  It should look a bit like this.
-    
-    ```
-    - 03-secrets/gitops-webhook-secret.yaml
-    - 03-secrets/webhook-secret-dev-python-devfile.yaml
-    - 04-tasks/update-image-tag.yaml
-    - 04-tasks/deploy-from-source-task.yaml
-    - 04-tasks/set-commit-status-task.yaml
-    ```
+
     
     * Now modify the deployment files for the app to pick up the generated image from the pipeline.  Navigate to environments/dev/apps/app-python-devfile/services/python-devfile/base/config.
 
@@ -275,10 +277,56 @@ The setup can be viewed in a number of stages
     cp -R dev/apps stage
     `
     
+    * Finally we need to add an extra perission, to allow the service account in the dev and stage namespaces, to pull images from the cicd namesapce ( which is where the image built by the pipeline gets stored).  Navigate to environments/dev/env/base.  Create a file called dev-clusterrepo-rolebinding.yaml with the following contents
+
+    ```
+    kind: RoleBinding
+    metadata:
+      name: dev-clusterrepo-rolebinding
+      namespace: cicd 
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: system:image-puller
+    subjects:
+    - kind: ServiceAccount
+      name: default
+      namespace: dev
+    ```
+   
+    * Then add the new file to the kustomization.yaml file - which should look a bit like this.
+
+    ```
+    resources:
+    - argocd-admin.yaml
+    - dev-environment.yaml
+    - dev-rolebinding.yaml
+    - dev-clusterrepo-rolebinding.yaml
+    ```
+    
+    * Then repeat the process in the staging environment.  So navigate to environments/stage/env/base.  Create a file called called stage-clusterrepo-rolebinding.yaml, with the following contents.
+
+    ```
+    kind: RoleBinding
+    metadata:
+      name: stage-clusterrepo-rolebinding
+      namespace: cicd 
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: system:image-puller
+    subjects:
+    - kind: ServiceAccount
+      name: default
+      namespace: stage
+    ```
+    
+    * Then add the new file to the kustomization.yaml file.
+    
     * Push these changes back to github with
 
     ```
-    cd ..
+    cd ../../../..
     git add .
     git commit -m "updated pipelines"
     git push -u origin main
@@ -289,16 +337,17 @@ The setup can be viewed in a number of stages
 
 5. **Setup the argo cd.** 
 
-Probably make the gitops project public - as its a bit easier.  Otherwise you will need to create access from argocd.
+  * First make the gitops project public - as its a bit easier.  Otherwise you will need to create access from argocd.  Navigate to github.com.  Click on the gitops project name, go to settings, scroll down to the Danger Zone and, choose Change repository visibility.  Make it public, and confirm the change.
 
-Get the admin password for argo.  From the command line type `oc -n openshift-gitops get secret openshift-gitops-cluster -o jsonpath="{.data['admin\.password']}" | base64 -d ; echo`
+  * Now lets login to argocd.  First get the admin password for argo.  From the command line type `oc -n openshift-gitops get secret openshift-gitops-cluster -o jsonpath="{.data['admin\.password']}" | base64 -d ; echo`
 
+  * Navigate to the argocd ui, by opening up openshift, clicking on the application menu (nine squares in the top right), and choosing Cluster ArgoCD. 
 
-Navigate to the argocd ui, by opening up openshift, clicking on the application menu (nine squares in the top right), and choosing Cluster ArgoCD. 
+  * Login as admin and the password above.  You should see the screen below.
 
-login as admin and the password above.
+  * Now create a high level application with the following values.  Click on the  + NEW APP button - you should see this screen.
 
-create a high level application with the following values
+  * Now fill in these fields.
 
 | field        | value                                                          |
 | ------------ | ---------------------------------------------------------------|
