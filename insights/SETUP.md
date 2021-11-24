@@ -12,6 +12,10 @@ UPgrade to RHEL 8.4 - `sudo dnf update`
 
 Reboot the vm - `sudo reboot`
 
+Then install the compliance packages
+
+`sudo dnf install scap-security-guide openscap-scanner  openscap`
+
 
 # Configure the vm in satelite so that remote execution will work
 
