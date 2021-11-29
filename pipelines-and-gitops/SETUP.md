@@ -342,12 +342,15 @@ The setup can be viewed in a number of stages
   * Now lets login to argocd.  First get the admin password for argo.  From the command line type `oc -n openshift-gitops get secret openshift-gitops-cluster -o jsonpath="{.data['admin\.password']}" | base64 -d ; echo`
 
   * Navigate to the argocd ui, by opening up openshift, clicking on the application menu (nine squares in the top right), and choosing Cluster ArgoCD. 
+  
   ![OpenshiftAppMenu](images/5.openshift-app-menu.png)
 
   * Login as admin and the password above.  You should see the screen below.
+  
   ![ArgoNoApps](images/5.argocd-no-apps.png)
 
   * Now create a high level application with the following values.  Click on the  + NEW APP button - you should see this screen.
+  
   ![ArgoCreateAppDialog](images/5.argo-create-app-dialog.png)
 
   * Now fill in these fields.
@@ -365,31 +368,37 @@ The setup can be viewed in a number of stages
   * Click CREATE.
 
   * You should see the initial application - like this.
+  
   ![ArgoFirstApp](images/5.argo-first-app.png)
 
   * Wait a few seconds, and you shoud see argo pulling in the other applications.  After its all settled down - it should look like this.
+  
   ![ArgoAllProjectsSynced](images/5.argo-projects-synced.png)
 
 6. **Finally setup the git webhook**
 
   * Finally you need to go into the source code project, and create a webhook to call the pipeline.
 
-Go into openshift, and go to projects, and click on cicd.
+  * Go into openshift, and go to projects, and click on cicd.
 
-From the cicd overview page, go to the inventory panel, and click on routes.
+  ![CICDProjectOverview](images/5.cicd-project-overview.png)
 
-Copy the route url, and go to github, and go to the source project.
+  * From the cicd overview page, go to the inventory panel, and click on routes.
 
-Click on Settings->Webhooks.  Then click on Add webhook.
+  ![RouteList](images/5.cicd-route.png)
 
-Paste the url from the event listener into the Payload URL field.  Set the content type to be application/json, and the secret to be the value from when you issued the kam command (kam-gitops-secret123! if you didnt change it).
+  * Copy the route url, and then go to github, and go to the source project.
 
-Then click on Add webhook.
+  ![GitHubSourceProject](images/5.github-src-project.png)
 
-Switch back to the code tab, edit the README.md and make a simple change by clicking on the pencil icon.
+  * Click on Settings->Webhooks.  Then click on Add webhook.
 
-Then press the commit changes button.  This should now trigger a pipeline build.
+  * Paste the url from the event listener into the Payload URL field.  Set the content type to be application/json, and the secret to be the value from when you issued the kam command (kam-gitops-secret123! if you didnt change it).
 
-Switch back to openshift, 
+  ![GitHubCreateWebHook](images/5.github-add-webhook.png)
+
+  * Then click on Add webhook.
+
+  * Awesome - you're all ready to do the demo.  Follow the instructions in the demo page - [here](DEMO.md).
 
 
