@@ -1,0 +1,92 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: update-image-tag
+  namespace: cicd
+spec:
+  params:
+  - name: OPS_GIT_REPO
+    type: string
+    default: 'starnold-redhat/python-gitops.git'
+  - name: OPS_GIT_NAME
+    type: string
+    default: 'python-gitops'
+  - name: GIT_USER_NAME
+    type: string
+    default: 'starnold-redhat'
+  - name: GIT_USER_EMAIL
+    type: string
+    default: 'starnold@redhat.com'
+  - name: SRC_GIT_NAME
+    type: string
+    default: 'app-python-devfile'
+  - name: DESCRIPTION
+    type: string
+  - name: IMAGE
+    type: string
+  - name: BUILDER_IMAGE
+    default: image-registry.openshift-image-registry.svc:5000/cicd/kustomize:1 
+    description: The location of the buildah builder image.
+    type: string
+
+  steps:
+  - image: $(params.BUILDER_IMAGE)
+    name: update-ops-repo-with-imagetag
+    env:
+      - name: GITHOSTACCESSTOKEN
+        valueFrom:
+          secretKeyRef:
+            key: "token"
+            name: "git-host-access-token"
+    resources: {}
+    script: >
+      #!/bin/sh
+
+      cd /workspace/source/
+
+      git config --global user.email $(params.GIT_USER_EMAIL)
+
+      git config --global user.name $(params.GIT_USER_NAME)
+
+      mkdir localgitops
+
+      cd localgitops
+
+      echo "gittoken" + ${GITHOSTACCESSTOKEN}
+
+      echo "git repo" + $(params.OPS_GIT_REPO)
+
+      echo "src git name" + $(params.SRC_GIT_NAME)
+
+      echo "git command: " +   https://${GITHOSTACCESSTOKEN}@github.com/$(params.OPS_GIT_REPO)
+      
+      git clone https://${GITHOSTACCESSTOKEN}@github.com/$(params.OPS_GIT_REPO)
+
+      # set image for dev deployment
+      echo "listing directory--->"
+
+      pwd
+
+      ls
+
+      cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)/environments/dev/apps/$(params.SRC_GIT_NAME)/services/python-devfile/base/config
+
+      kustomize edit set image $(params.IMAGE)
+
+      # set image for stage deployment
+
+      cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)/environments/stage/apps/$(params.SRC_GIT_NAME)/services/python-devfile/base/config
+
+      kustomize edit set image $(params.IMAGE)
+
+      # Push back to git
+
+      cd /workspace/source/localgitops/$(params.OPS_GIT_NAME)
+
+      git add .
+
+      git commit -m "$(params.DESCRIPTION)"
+
+      git push -u origin HEAD:main
+  workspaces:
+    - name: source
